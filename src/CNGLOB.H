@@ -484,7 +484,7 @@ extern int CheckFP( double v, const char* tag);
 
 #define GLOB	// ifndef GLOB may be used to prevent duplicate compilation
 
-extern TOPRAT Top;	// top-level record universally accessible
+extern class TOPRAT Top;	// top-level record universally accessible
 class record;
 typedef USI RCT;	// record type type.  Needed for RATBASE defn below, for ratpak.h, and rccn.h.
 struct SFIR;		// small fields-in-record info table (for basAnc.fir, SRD.fir). struct in srd.h.
@@ -529,8 +529,8 @@ enum CLEANCASE		// caution code assumes STARTUP < ENTRY < others.
 // here to reduce need to include files.
 
 // cncult.cpp (or stub in e.g. rcdef.cpp)
-int getCpl( TOPRAT** pTp=NULL);	// get chars/line
-									// default if Top not yet init & input value unavailable
+int getCpl( class TOPRAT** pTp=NULL);	// get chars/line
+										// default if Top not yet init & input value unavailable
 
 // re DLL interrupt (in cse.cpp, stub in rcdef.cpp)
 int CheckAbort();
@@ -708,19 +708,8 @@ enum {			// irrad components
 //  NOTE: code depends on value order, change with care
 enum SFCLASS { sfcNUL, sfcSURF, sfcDOOR, sfcWINDOW, sfcDUCT, sfcPIPE};
 
-// zone air flow indices
-#if 0	// unused, 2-20-2013
-x //   note: zafCOUNT must equal #define ZAFCOUNT in cndefns.h (re use in cnrecs.def)
-x enum ZAFTY { zafANINF, zafANVENT, zafINFIL, zafDUCTLKI, zafSYSAIRI,
-x	zafDUCTLKO, zafSYSAIRO, zafDUCTLKILS, zafCOUNT };
-x const int zanDUCTLKI   = 0x00000001;
-x const int zanDUCTLKO   = 0x00000002;
-x const int zanDUCTLKUB  = 0x00000004;
-x const int zanSYSAIR    = 0x00000008;
-x const int zanSYSAIRUB  = 0x00000010;
-#endif
 
-
+#if !defined( NODTYPESH)
 // End Uses
 //  NENDUSES = number of end use members in MTR_IVL_SUB, for mtrsAccum and mtrAccum1.
 //	Defined in terms of last end use choice: last end use member in MTR_IVL_SUB.
@@ -729,12 +718,7 @@ const int NENDUSES = C_ENDUSECH_PV;	// must be same as C_ENDUSECH_PV
 const int NDHWENDUSES = C_DHWEUCH_COUNT;	// # of DHW end uses
 static_assert(NDHWENDUSES == NDHWENDUSESPP, "Inconsistent DHW EU constants");
 static_assert(NDHWENDUSESXPP == C_DHWEUXCH_COUNT, "Inconsistent DHW UEX constants");
-#if 0
-x not used / not maintained 6-5-2012
-x //--- data type for subscripting of ResEgy.endUse (for callers, not used here)
-x enum endUses { euClg=0, euHtg, euHPHtg, euSHW, euFan, euAux, euProc, euLit, euRcp, euExt, euUser1, euUser2 };
 #endif
-
 
 // more nested includes
 #include "dmpak.h"

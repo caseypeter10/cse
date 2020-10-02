@@ -1,6 +1,6 @@
 project(CSE)
 
-cmake_minimum_required(VERSION 3.10.0)
+cmake_minimum_required(VERSION 3.18.3)
 
 set (CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
@@ -8,7 +8,6 @@ set (CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
 
 include(BuildFlags)
-#include(cotire)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 

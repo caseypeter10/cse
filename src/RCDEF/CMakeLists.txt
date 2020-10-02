@@ -27,6 +27,6 @@ include_directories(
   .
 )
 
-add_definitions(-DNOVRR)
+add_compile_definitions(NOVRR)
 
 add_executable(RCDEF ${source} ${headers})
