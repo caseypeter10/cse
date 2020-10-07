@@ -260,8 +260,8 @@ float TOPRAT::tp_WindPresV(			// wind velocity pressure
 ///////////////////////////////////////////////////////////////////////////////
 /*static*/ const int AFMTR_IVL::NAFCATS
 	= (sizeof(AFMTR_IVL) - offsetof( AFMTR_IVL, amt_total)) / sizeof(float);
-// NAFCATS s/b same as AFCAT choices + 1 (for total)
-static_assert(AFMTR_IVL::NAFCATS == C_AFCAT_COUNT+1, "Inconsistent AFMTR constants");
+// NAFCATS s/b same as AFCAT choices + 1 (for total) - 1 (for C_AFCAT_NONE)
+static_assert(AFMTR_IVL::NAFCATS == C_AFCAT_COUNT+1-1, "Inconsistent AFMTR constants");
 //-----------------------------------------------------------------------------
 void AFMTR_IVL::amt_Copy(			// copy 
 	const AFMTR_IVL* sIvl,	// source
@@ -877,7 +877,7 @@ RC IZXRAT::iz_CkfIZXFER()	// input checks
 	}
 
 	if (!iz_CanHaveAFCat())
-		ignore(IZXRAT_AFCAT, when);
+		ignore(IZXRAT_AFCATI, when);
 
 	// horizontal opening
 	//   stairangle defaults
@@ -1048,16 +1048,13 @@ x		}
 //-------------------------------------------------------------------
 void IZXRAT::iz_SetupAfMtrs()
 {
-	// Air flow category
-	if (!iz_CanHaveAFCat())
-		iz_afCat = -1;
-	else if (!IsSet(IZXRAT_AFCAT))
-		iz_afCat = iz_AfCatDefault();	// default category (may return -1)
+	// Air flow categories (set iz_afMtrCat1 and iz_afMtrCat2)
+	iz_AfMtrCats();
 
 	// AFMTR ptrs: NULL if no meter specified -> no air flow accounting
 	//  one pointer for positive flows, one for negative
 	iz_pAfMtr1 = iz_pAfMtr2 = NULL;	// insurance
-	if (iz_afCat >= 0)
+	if (iz_afMtrCat1 != C_AFCAT_NONE)
 	{	// set up ptrs to AFMTR(s)
 		const ZNR* zp;
 		if (iz_zi1 > 0)
@@ -1081,25 +1078,56 @@ void IZXRAT::iz_SetupAfMtrs()
 				
 }		// IZXRAT::iz_SetupAfMtrs
 //-----------------------------------------------------------------------------
-AFCAT IZXRAT::iz_AfCatDefault() const
+int IZXRAT::iz_IsCZ(	// detect conditioned / unconditioned adjacent zones
+	int iZn) const	// 1: check inside zone, else checkout outside
+// returns -1 (does not exist), 0=unconditioned, 1=conditioned
 {
-	AFCAT afCat;
+	int zi = iZn==1 ? iz_zi1 : iz_zi2;
+	const ZNR* zp = ZrB.GetAtSafe( zi);
+	return !zp ? -1 : !zp->zn_IsUZ();
+
+}	// IZXRAT::iz_IsCZ
+//-----------------------------------------------------------------------------
+void IZXRAT::iz_AfMtrCats()		// finalize runtime air flow categories
+// Tricky: interzone flow UZ/CZ categories differ depending on side of vent
+{
+	iz_afMtrCat1 = iz_afMtrCat2 = -1;	// flag as unset
 	if (!iz_CanHaveAFCat())
-		afCat = -1;		// not trackable
+		iz_afMtrCat1 = C_AFCAT_NONE;		// not trackable
+	else if (IsSet(IZXRAT_AFCATI))
+		iz_afMtrCat1 = iz_afCatI;	// use user input (not checked for consistency with IZXRAT type)
 	else if (iz_IsSysAir())
-		afCat = C_AFCAT_HVAC;
+		iz_afMtrCat1 = C_AFCAT_HVAC;
 	else if (iz_IsDuctLk())
-		afCat = C_AFCAT_DUCTLK;
+		iz_afMtrCat1 = C_AFCAT_DUCTLK;
 	else if (iz_IsHERV())
-		afCat = iz_IsHERVIZ() ? C_AFCAT_FANIZ : C_AFCAT_FANEX;
-	else if (iz_IsExterior())
-		afCat = iz_IsFixedFlow() ? C_AFCAT_FANEX : C_AFCAT_INFILEX;
+		iz_afMtrCat1 = C_AFCAT_FANEX;
 	else
-		afCat = iz_IsFixedFlow() ? C_AFCAT_FANIZ : C_AFCAT_INFILIZ;
+	{	const static int afCats[3][3] =
+		{	{ C_AFCAT_FANEX, C_AFCAT_VNTEX, C_AFCAT_INFEX },
+			{ C_AFCAT_FANUZ, C_AFCAT_VNTUZ, C_AFCAT_INFUZ },
+			{ C_AFCAT_FANCZ, C_AFCAT_VNTCZ, C_AFCAT_INFCZ }
+		};
+		
+		// fan / vent / infil
+		//   Note: vent guess is approx, explicit izAFCat input may be necessary
+		int izMode = iz_IsFixedFlow() ? 0 : iz_MightBeNatVent() ? 1 : 2;
+		if (iz_IsExterior())
+			iz_afMtrCat1 = afCats[0][izMode];
+		else
+		{	// interzone: set category per *other* side
+			//   iz_IsCZ() returns -1 (no zone, not expected), 0 (uncond), 1 (cond)
+			int iCZ1 = iz_IsCZ(1);	// inside
+			int iCZ2 = iz_IsCZ(2);	// outside
+			iz_afMtrCat1 = afCats[iCZ2 + 1][izMode];
+			iz_afMtrCat2 = afCats[iCZ1 + 1][izMode];
+		}
+	}
 
-	return afCat;
+	if (iz_afMtrCat2 < 0)
+		iz_afMtrCat2 = iz_afMtrCat1;
 
-}		// IZXRAT::iz_AfcatDefault
+}		// IZXRAT::iz_AfMtrCats
 //-----------------------------------------------------------------------------
 RC IZXRAT::iz_SetupNonAirNet()		// interzone transfer one-time initialization
 
@@ -1171,7 +1199,17 @@ RC IZXRAT::iz_SetupNonAirNet()		// interzone transfer one-time initialization
 	return RCOK;
 }           // IZXRAT::iz_SetupNonAirNet
 //-----------------------------------------------------------------------------
+bool IZXRAT::iz_MightBeNatVent() const	// detect possible controlled nat vent
+// returns true iff this looks like typical controlled vent (e.g. openable window)
+// used re default iz_afCat
+{
+	bool ventIsh = 	!iz_IsFixedFlow() && iz_a1 == 0.f && IsSet(IZXRAT_A2);
+
+	return ventIsh;
+}		// IZXRAT::iz_MightBeVent
+//-----------------------------------------------------------------------------
 bool IZXRAT::iz_HasVentEffect() const	// determine whether this IZXRAT can "vent"
+// can vary during run due to expressions
 // returns 1 iff iz vent mode (iz_ad[ 1]) differs from infil-only iz_ad[ 0]
 {
 	bool bVentEffect =
@@ -1539,12 +1577,12 @@ RC IZXRAT::iz_EndSubhr()			// end-of-subhour vent calcs
 			+= (1.f - fVent)*iz_ad[0].ad_mdotB + fVent * iz_ad[1].ad_mdotB;
 	if (iz_doingAfMtr && iz_amfNom != 0.f)
 	{	if (iz_pAfMtr1)
-			iz_pAfMtr1->amt_AccumCat(iz_afCat, iz_amfNom);
+			iz_pAfMtr1->amt_AccumCat(iz_afMtrCat1, iz_amfNom);
 		if (iz_pAfMtr2)
 		{	// flow is opposite direction from z2 POV
 			// HERV: iz_pAfMtr2 points to exhaust source zone (may be z1)
 			//       HERV same for vent / no vent (use iz_ad[ 0] w/o fVent)
-			iz_pAfMtr2->amt_AccumCat(iz_afCat, 
+			iz_pAfMtr2->amt_AccumCat(iz_afMtrCat2, 
 					iz_IsHERV() ? -iz_ad[0].ad_mdotX : -iz_amfNom);
 		}
 	}
