@@ -81,6 +81,12 @@ if (MSVC AND NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel"))
   )
   string(REPLACE ";" " " CMAKE_EXE_LINKER_FLAGS_DEBUG "${LinkDebug}")
 
+   set(LibRelease
+    /LTCG       # Specifies link-time code generation.
+  )
+  string(REPLACE ";" " " CMAKE_STATIC_LINKER_FLAGS_RELEASE "${LibRelease}")
+
+
 
 
 endif()
