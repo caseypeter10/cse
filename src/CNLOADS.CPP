@@ -1780,7 +1780,10 @@ RC RSYS::rs_CkFHeating()
 	else if (rs_IsWSHP())
 	{
 		rc |= requireN(whenTy, RSYS_CAPH, RSYS_TDBOUT, 0);
-		rc |= ignoreX(whenTy, ASHP_HtgFNs, ASHPVC_HtgFNs);
+		rc |= ignoreX(whenTy, RSYS_HSPF, RSYS_CAP47,
+		RSYS_CAP35, RSYS_COP35, RSYS_CAP17, RSYS_COP17, RSYS_ASHPLOCKOUTT,
+		RSYS_CAPRAT1747, RSYS_CAPRAT9547,  RSYS_CDH,
+		RSYS_DEFROSTMODEL, ASHPVC_HtgFNs);
 	}
 	else if (rs_IsASHP())
 	{
@@ -2150,10 +2153,6 @@ RC RSYS::rs_TopRSys1()		// check RSYS, initial set up for run
 			rs_fxCapHAsF = 1.4f;
 		}
 
-		if (rs_IsWSHP())
-		{
-			rs_fanHRtdH = rs_FanHRtdPerTon( rs_capH / 12000.f);
-		}
 	}
 
 	// loop all zones served by this RSYS
@@ -2404,6 +2403,12 @@ void RSYS::rs_AuszFinal()		// called at end of successful autosize (after all xx
 		}
 		else
 			rs_capH *= rs_fxCapHTarg;		// not ASHP: apply user's oversize factor
+
+		if (rs_IsWSHP())
+		{
+			rs_fanHRtdH = rs_FanHRtdPerTon(rs_capH / 12000.f);
+		}
+
 	}
 
 	if (rs_isAuszC)
@@ -2884,7 +2889,8 @@ RC RSYS::rs_SetupCapC(		// derive constants that depend on capacity
 	}
 	else if (rs_IsWSHP())
 	{
-
+		rs_capnfX = -(fabs(rs_cap95) + rs_fanHRtdC);	// coil (gross) total capacity at 95 F, Btuh
+															// (< 0)
 	}
 	else
 	{	// rs_cap95 now known = net total cooling cap at 95 F (> 0)
@@ -3637,8 +3643,7 @@ x		printf("\nhit");
 			const float capF = WSHPCoolingCapF(rs_tdbOut, rs_twbCoilIn, airMassFlowF);
 			const float capSenF = WSHPCoolingCapSenF(rs_tdbOut, rs_tdbCoilIn , rs_twbCoilIn, airMassFlowF);
 			const float inpF = WSHPCoolinginpF(rs_tdbOut, rs_twbCoilIn, airMassFlowF);
-
-			rs_capTotCt = -(rs_cap95 + rs_fanHRtdC) * capF;		// total gross capacity at current conditions, Btuh
+			rs_capTotCt = rs_capnfX * capF;		// total gross capacity at current conditions, Btuh
 			rs_capSenCt = rs_SHRtarget * rs_capTotCt * capSenF;  // SHR set using air-to-air approach
 			if (rs_capSenCt > rs_capTotCt)
 			{
