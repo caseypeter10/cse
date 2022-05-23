@@ -22,7 +22,6 @@
 
 /*------------------------------- INCLUDES --------------------------------*/
 #include "CSE.h"		// globals required for some configurations
-#include <conio.h>		// getch
 
 #include <MESSAGES.H>	// msgI
 #include <ENVPAK.H>		// byebye
@@ -41,6 +40,8 @@
 #endif		// LOGWIN
 
 #include <RMKERR.H>		// decls for this file
+
+#include <iostream>
 
 #ifndef _WIN32
 #define NO_ERROR 0
@@ -225,7 +226,7 @@ RC FC errFileOpen(
 // returns RCOK if all OK,
 //         RCBAD if file _erfName cannot be opened
 {
-	static char erfName[ _MAX_PATH] = { 0 };
+	static char erfName[ FILENAME_MAX] = { 0 };
 	RC rc=RCOK;
 
 // close existing error message file, if any.  recursion CAUTION: called from errI.
@@ -238,7 +239,7 @@ RC FC errFileOpen(
 		if (!IsBlank( erfName))				// if have saved name -- insurance
 		{
 			if (len==0L)				// if file is empty (no errors)
-				unlink(erfName);			// erase file -- don't garbage up directory
+				remove(erfName);			// erase file -- don't garbage up directory
 #ifdef OUTPNAMS	//may be defined in cnglob.h. 10-93.
 			else					// file not erased,
 				saveAnOutPNam(erfName);		// save name of file for return to caller. cse.cpp, decl cnglob.h.
@@ -1028,7 +1029,8 @@ LOCAL int presskey( 	// prompt user after error message display
 		erAction == ABT
 		? "Press any key (program will abort) "
 		: "Press 'A' to abort, any other key to continue " );
-	int key = getch();							// input any char
+	int key;
+	std::cin >> key;							// input any char
 	printf(  "\r                                               \r"); 	// erase prompt on screen
 	// if screenLs was 'dashed' or 'begLine', it is now the same.
 	if (screenLs==midLine)		// if was midline (unexpected)
@@ -1075,7 +1077,7 @@ RC DbFileOpen(
 	RC rc=RCOK;
 #if defined( VR_DEBUGPRINT)
 	if (_dbFName)
-		unlink( _dbFName);		// erase file -- don't garbage up directory
+		remove( _dbFName);		// erase file -- don't garbage up directory
 #else
 	static char dbFName[ _MAX_PATH] = { 0 };
 
