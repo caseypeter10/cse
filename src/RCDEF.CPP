@@ -561,7 +561,7 @@ static void FC strsndump(               /* dumps snake info */
 // RCDEF MAIN ROUTINE
 //////////////////////////////////////////////////////////////////////////////
 
-int CDEC main( SI argc, char * argv[] )
+int CDEC main( int argc, char * argv[] )
 {
 	FILE *file_dtypes, *file_units, *file_limits, *file_fields, *file_records;
 	/* .def files, opened at start */
@@ -863,7 +863,7 @@ LOCAL void dtypes(                      // do data types
 			// process a choice type.  choicb/n format: han *choicb/n <name> {  name "text"   name "text"  ...  }
 
 			dtxnm[val] = NULL;                                   // no external name
-			dtdecl[val] = choicn ? "float" : "SI";               // ... int-->SI 2-94 to keep 16 bits
+			dtdecl[val] = choicn ? const_cast<char*>("float") : const_cast<char*>("SI");               // ... int-->SI 2-94 to keep 16 bits
 			dtsize[val] = choicn ? sizeof(float) : sizeof(SI);
 			dtmax[val]  = NULL;                                  // no max
 			// 2-94 working on replacing size from cndtypes.def with sizeof(decl), when succeeds can probably ignore size in def file.
@@ -2677,7 +2677,7 @@ LOCAL void rec_fds()
 		}                            // use strsave not stash: will be dmfree'd.
 
 		/* get type (table index) for field's typeName */
-
+		{
 		USI fieldtype = (USI)lufind( (LUTAB1*)&fdlut, fdTyNam);     // look in fields table for field typeName
 		if (fieldtype == (USI)LUFAIL)
 		{
@@ -2736,7 +2736,7 @@ LOCAL void rec_fds()
 					rcNam );
 
 		nstrel++;               // next structure element (subscript) / is count after loop
-
+		}
 nextFld: ;                      /* *directives that complete processing field come here from inner loop
 								   to get token and start new field if not *END.  *struct, *nest. */
 	}    // end of field loop
@@ -3129,7 +3129,7 @@ LOCAL void wSrfd1( FILE *f)
 	for (i = 0; i < nfdtypes; i++)
 	{
 		// write data type 0 as "0", not "DTSI" or whatever is first, for clearer entry 0 (FDNONE)
-		dtTx = (Fdtab[i].dtype==0  ?  "0"
+		dtTx = (Fdtab[i].dtype==0  ?  const_cast<char*>("0")
 				:  strtcat( "DT", dtnames[ dtnmi[ DTBMASK&(Fdtab[i].dtype) ] ],
 							NULL ) );
 		/* write line: DTXXXX,   LMXXXX,   UNXXXX,      // number  NAME */
