@@ -15,7 +15,10 @@
 
 #include <signal.h> 	// signal SIGINT
 #include <float.h>	// FPE_UNDERFLOW FPE_INVALID etc
+<<<<<<< HEAD
 #include <conio.h>
+=======
+>>>>>>> envpak-multiplatform-upgrade
 #include <sys/timeb.h>	// timeb structure
 
 #include <LOOKUP.H>	// lookws wstable
@@ -23,6 +26,10 @@
 #include <XIOPAK.H>	// xchdir
 
 #include <ENVPAK.H>	// declares functions in this file
+
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
+#endif
 
 /*-------------------------------- DEFINES --------------------------------*/
 // (none now)
