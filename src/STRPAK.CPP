@@ -8,7 +8,7 @@
 
 /*------------------------------- INCLUDES --------------------------------*/
 #include <CNGLOB.H>
-
+#include "STRPAK.H"
 #include <MESSAGES.H>	// MAX_MSGLEN msgI
 
 // #include <strpak.h>	// decls for this file (#included in cnglob.h)
@@ -1382,22 +1382,6 @@ char* _strlwr(char* stringMod) // Substitude strlwr function
 		stringMod[i] = tolower(stringMod[i]);
 	}
 	return stringMod;
-}
-int _strnicmp(			// Substitude windows _strnicmp
-	const char* char1,	// First string to be compare
-	const char* char2,	// Second string to be compare
-	size_t count)		// Number of characters to compare
-// Compares two string ignoring case sensitivity upto the count.
-// Eventually replace this function with POSIX standard
-{
-	int sum{ 0 };
-	for (size_t i = 0; i < count; i++, char1++, char2++) {
-		sum += tolower((unsigned char)*char1) - tolower((unsigned char)*char2);
-		if (sum != 0 || *char1 == '\0' || *char2 == '\0') {
-			return sum;
-		}
-	}
-	return 0;
 }
 #endif
 //=============================================================================
