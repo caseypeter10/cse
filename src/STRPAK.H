@@ -154,6 +154,7 @@ int _stricmp(const char* char1, const char* char2);
 int _strnicmp(const char* char1, const char* char2, size_t count);
 char* _strupr(char* stringMod);
 char* _strlwr(char* stringMod);
+int memicmp(const void* str1, const void* str2, unsigned int count);
 #endif
 
 
