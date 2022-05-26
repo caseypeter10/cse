@@ -1147,6 +1147,47 @@ void createPath(			// Joins the directory path with the file name to create its 
 	strcpy(fullPath, directoryPath.relative_path().string().c_str());
 }  /* createPath */
 //=============================================================================
+void getPathRootName(	// Gets the drive letter followed by a colon (:)
+	const char* path,	// Full path
+	char* rootName)		// Output root name
+{
+	filesys::path filePath(path);
+	strcpy(rootName, filePath.root_name().string().c_str());
+}		/* getPathRootName */
+//=============================================================================
+void getPathRootDirectory(	// Directory path including trailing slash
+	const char* path,		// Full path
+	char* rootDirectory)	// Output root directory
+{
+	filesys::path filePath(path);
+	strcpy(rootDirectory, filePath.root_directory().string().c_str());
+	strcat(rootDirectory, filePath.relative_path().parent_path().string().c_str());
+	strcat(rootDirectory, filePath.root_directory().string().c_str());
+}		/* getPathRootDirectory */
+//=============================================================================
+void getPathRootStem(	// Base filename (no extension)
+	const char* path,	// Full path
+	char* rootStem)		// Output root stem
+{
+	filesys::path filePath(path);
+	strcpy(rootStem, filePath.stem().string().c_str());
+}		/* getPathRootStem */
+//=============================================================================
+void getPathExtension(	// Filename extension (including leading period (.))
+	const char* path,	// Full path
+	char* fileExtension)// Output file extension
+{
+	filesys::path filePath(path);
+	strcpy(fileExtension, filePath.extension().string().c_str());
+}		/* getPathExtension */
+//=============================================================================
+bool hasExtension(			// Checks if the path contains an extension
+	const char* filePath)	// Full path
+{
+	return filesys::path(filePath).has_extension();
+}		/* hasExtension */
+//=============================================================================
+
 // all if-outs below
 #ifdef TEST
 t/* ********************** UNMAINTAINED TEST CODE ************************** */
