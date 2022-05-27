@@ -244,7 +244,7 @@ add_executable(CSE ${source} ${rcFile} ${headers})
 target_compile_options(CSE PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:/W4>
   $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
-  -Wno-writable-strings -Wno-format -Wno-unused-value -Wno-varargs> 
+  -Wno-writable-strings -Wno-format -Wno-unused-value -Wno-varargs -Wno-undefined-bool-conversion -Wno-dangling-else> 
 )
 target_compile_features(CSE PUBLIC cxx_std_17)
 
