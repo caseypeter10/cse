@@ -240,6 +240,12 @@ addMSVCPrecompiledHeader("cnglob.h" precomp source)
 
 # Final executable/linking
 add_executable(CSE ${source} ${rcFile} ${headers})
+# Added for debuging purposes to be deleted in the future
+target_compile_options(CSE PRIVATE
+  $<$<CXX_COMPILER_ID:MSVC>:/W4>
+  $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
+  -Wno-writable-strings -Wno-format -Wno-unused-value -Wno-varargs> 
+)
 target_compile_features(CSE PUBLIC cxx_std_17)
 
 if(USE_XMODULE)

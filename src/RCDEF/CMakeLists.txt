@@ -35,7 +35,7 @@ add_executable(RCDEF ${source} ${headers})
 target_compile_options(RCDEF PRIVATE
   $<$<CXX_COMPILER_ID:MSVC>:/W4>
   $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
-  -Wno-writable-strings -Wno-format -Wno-unused-value>
+  -Wno-writable-strings -Wno-format -Wno-unused-value -Wno-undefined-inline -Wno-varargs>
 )
 
 target_compile_features(RCDEF PRIVATE cxx_std_17)
