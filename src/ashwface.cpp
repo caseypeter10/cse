@@ -1332,9 +1332,9 @@ RC XASHWAT::xw_BuildLib()		// libary of built-in types
 // Openness = tauBB =  0.01
 // Beam total transmittance = tauBT = 0.11
 // Beam total reflectance     = rhoBT = 0.38
-
-//                     										tauBB  rhoBT tauBT   
-	xw_layerLib.push_back( CFSLAYER( "DrapeMed",  ltyDRAPE, 0.01f, 0.0f, 0.999f));
+// Greenscreen Eco .01 openness Pewter https://hunterdouglasfabrics.com/greenscreen-eco
+//                     										tauBB  rhoBT  tauBT   
+	xw_layerLib.push_back( CFSLAYER( "DrapeMed",  ltyDRAPE, 0.01f, 0.31f, 0.28f));
 
 	xw_CFSLib.push_back( CFSTYX( "CLEAR_SINGLE", 1.042, 0.860, "102",  NULL));
 	xw_CFSLib.push_back( CFSTYX( "CLEAR_AIR",    0.481, 0.763, "102",  "Air", .492, "102",   NULL));
