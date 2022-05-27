@@ -1334,7 +1334,7 @@ RC XASHWAT::xw_BuildLib()		// libary of built-in types
 // Beam total reflectance     = rhoBT = 0.38
 
 //                     										tauBB  rhoBT tauBT   
-	xw_layerLib.push_back( CFSLAYER( "DrapeMed",  ltyDRAPE, 0.01f, 1.5f, 0.31f));
+	xw_layerLib.push_back( CFSLAYER( "DrapeMed",  ltyDRAPE, 0.01f, 0.0f, 0.999f));
 
 	xw_CFSLib.push_back( CFSTYX( "CLEAR_SINGLE", 1.042, 0.860, "102",  NULL));
 	xw_CFSLib.push_back( CFSTYX( "CLEAR_AIR",    0.481, 0.763, "102",  "Air", .492, "102",   NULL));
