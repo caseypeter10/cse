@@ -1332,7 +1332,8 @@ RC XASHWAT::xw_BuildLib()		// libary of built-in types
 // Openness = tauBB =  0.01
 // Beam total transmittance = tauBT = 0.11
 // Beam total reflectance     = rhoBT = 0.38
-//GREENSCREEN ECO  1% Openness - Pewter
+
+//                     										tauBB  rhoBT tauBT   
 	xw_layerLib.push_back( CFSLAYER( "DrapeMed",  ltyDRAPE, 0.01f, 1.5f, 0.31f));
 
 	xw_CFSLib.push_back( CFSTYX( "CLEAR_SINGLE", 1.042, 0.860, "102",  NULL));
